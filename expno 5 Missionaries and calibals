@@ -1,0 +1,85 @@
+from collections import deque
+
+class State:
+    def __init__(self, missionaries, cannibals, boat):
+        self.missionaries = missionaries
+        self.cannibals = cannibals
+        self.boat = boat
+
+    def __eq__(self, other):
+        return self.missionaries == other.missionaries and \
+               self.cannibals == other.cannibals and \
+               self.boat == other.boat
+
+    def __hash__(self):
+        return hash((self.missionaries, self.cannibals, self.boat))
+
+    def __str__(self):
+        return f"({self.missionaries}, {self.cannibals}, {self.boat})"
+
+
+def is_valid_state(state):
+    if state.missionaries < 0 or state.missionaries > 3 or \
+            state.cannibals < 0 or state.cannibals > 3:
+        return False
+    if state.missionaries < state.cannibals and state.missionaries > 0:
+        return False
+    if state.missionaries > 3 - state.cannibals and state.missionaries < 3:
+        return False
+    return True
+
+
+def get_next_states(current_state):
+    possible_states = []
+
+    if current_state.boat == 'left':
+        possible_states.append(State(current_state.missionaries - 2, current_state.cannibals, 'right'))
+        possible_states.append(State(current_state.missionaries, current_state.cannibals - 2, 'right'))
+        possible_states.append(State(current_state.missionaries - 1, current_state.cannibals - 1, 'right'))
+        possible_states.append(State(current_state.missionaries - 1, current_state.cannibals, 'right'))
+        possible_states.append(State(current_state.missionaries, current_state.cannibals - 1, 'right'))
+    else:
+        possible_states.append(State(current_state.missionaries + 2, current_state.cannibals, 'left'))
+        possible_states.append(State(current_state.missionaries, current_state.cannibals + 2, 'left'))
+        possible_states.append(State(current_state.missionaries + 1, current_state.cannibals + 1, 'left'))
+        possible_states.append(State(current_state.missionaries + 1, current_state.cannibals, 'left'))
+        possible_states.append(State(current_state.missionaries, current_state.cannibals + 1, 'left'))
+
+    return [state for state in possible_states if is_valid_state(state)]
+
+
+def bfs():
+    initial_state = State(3, 3, 'left')
+    goal_state = State(0, 0, 'right')
+
+    visited = set()
+    queue = deque([[initial_state]])
+
+    while queue:
+        path = queue.popleft()
+        current_state = path[-1]
+
+        if current_state == goal_state:
+            return path
+
+        if current_state not in visited:
+            visited.add(current_state)
+            for next_state in get_next_states(current_state):
+                new_path = list(path)
+                new_path.append(next_state)
+                queue.append(new_path)
+
+    return None
+
+
+def print_solution(path):
+    print("Solution:")
+    for i, state in enumerate(path):
+        print(f"Step {i}: {state}")
+
+
+solution = bfs()
+if solution:
+    print_solution(solution)
+else:
+    print("No solution found.")
