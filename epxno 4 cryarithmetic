@@ -1,0 +1,46 @@
+def solve_cryptarithmetic(puzzle):
+    words = puzzle.split()
+    unique_chars = set(''.join(words))
+    if len(unique_chars) > 10:
+        print("Invalid puzzle: More than 10 unique characters")
+        return
+
+    chars = list(unique_chars)
+    digits = [0] * len(chars)
+    used_digits = [False] * 10
+    solution = {}
+
+    def is_valid():
+        return len(set(solution.values())) == len(solution.values())
+
+    def solve(index):
+        if index == len(chars):
+            if is_valid():
+                return True
+            else:
+                return False
+
+        for digit in range(10):
+            if not used_digits[digit]:
+                used_digits[digit] = True
+                solution[chars[index]] = digit
+
+                if solve(index + 1):
+                    return True
+
+                used_digits[digit] = False
+
+        return False
+
+    if solve(0):
+        for word in words:
+            print(word, end=' ')
+            for char in word:
+                print(solution[char], end='')
+            print()
+    else:
+        print("No solution found")
+
+# Example usage:
+puzzle = "SEND + MORE = MONEY"
+solve_cryptarithmetic(puzzle)
